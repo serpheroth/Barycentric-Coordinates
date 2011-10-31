@@ -4,27 +4,31 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
+#include <GL/glext.h>
+
+#include <vector>
+
+using namespace std;
 
 class Shader {
     public:
-        Shader(int shader_type);
-        Shader(const char* f_name, int shader_type);
+        Shader();
+        Shader(const char* f_name, GLenum type);
        ~Shader();
 
-        void load(const char* f_name);
-        void clear();
+        void load(const char* f_name, GLenum type);
+        void link();
 
         void bind();
         void unbind();
 
-        bool   ok();
-        GLenum type();
+        void uniform2f(const char* name, float a, float b);
+        void uniform3f(const char* name, float a, float b, float c);
+
         GLuint id();
     private:
-        bool        m_successful;
-        GLenum      m_shader_type;
-        GLuint      m_shader_id;
-        GLhandleARB m_shader;
+        GLuint m_program_id;
+        vector<GLhandleARB> m_shaders;
 };
 
 #endif
