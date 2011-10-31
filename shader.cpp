@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#ifdef GLEW_SUPPORT
+
 Shader::Shader() {
     m_program_id = glCreateProgram();
 }
@@ -115,3 +117,5 @@ void Shader::uniform3f(const char* name, float a, float b, float c) {
 GLuint Shader::id() {
     return m_program_id;
 }
+
+#endif //GLEW_SUPPORT

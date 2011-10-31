@@ -13,7 +13,7 @@
 using namespace std;
 
 #define ESCAPE 27
-#define RADIUS 20
+#define RADIUS 5
 #define WIDTH  400
 #define HEIGHT 400
 
@@ -92,24 +92,28 @@ int main(int argc, char** argv) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+#ifdef GLEW_SUPPORT
+    printf("GLEW is supported.\n");
     glewInit();
 
     // make sure GLSL is supported
-    if(!GLEW_ARB_vertex_shader ||
-       !GLEW_ARB_fragment_shader) {
-        printf("ERROR: GLSL not supported.\n");
-        SHADER_SUPPORT = false;
-        glShadeModel(GL_SMOOTH);
-    } else {
+    if(GLEW_ARB_vertex_shader &&
+       GLEW_ARB_fragment_shader) {
         SHADER_SUPPORT = true;
 
         f_shader = new Shader();
 
-        f_shader->load("shader.vert",GL_VERTEX_SHADER);
+        //f_shader->load("shader.vert",GL_VERTEX_SHADER);
         f_shader->load("shader.frag",GL_FRAGMENT_SHADER);
-        f_shader->link();
+        f_shader->link(); 
     }
-
+    else
+#endif
+    {
+        printf("ERROR: GLSL not supported.\n");
+        SHADER_SUPPORT = false;
+        glShadeModel(GL_SMOOTH); 
+    }
     a.p = vec2(200,100);
     b.p = vec2(100,300);
     c.p = vec2(300,300);
@@ -146,7 +150,8 @@ void shaderDisplay(void) {
     glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
-
+#ifdef GLEW_SUPPORT
+    printf("GLEW supported!\n");
     f_shader->bind();
     
     // set uniforms
@@ -156,13 +161,19 @@ void shaderDisplay(void) {
     f_shader->uniform3f("acol", a.c.x, a.c.y, a.c.z);
     f_shader->uniform3f("bcol", b.c.x, b.c.y, b.c.z);
     f_shader->uniform3f("ccol", c.c.x, c.c.y, c.c.z);
+    f_shader->uniform2f("windim",W_WIDTH,W_HEIGHT);
+    f_shader->uniform2f("realdim",WIDTH,HEIGHT);
+#endif
 
     glBegin(GL_TRIANGLES);
     glVertex2f(a.p.x,a.p.y);
     glVertex2f(b.p.x,b.p.y);
     glVertex2f(c.p.x,c.p.y);
     glEnd();
+
+#ifdef GLEW_SUPPORT
     f_shader->unbind();
+#endif
 
     glutSwapBuffers();
 }
