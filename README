@@ -1,0 +1,14 @@
+Tom Fiset
+Barycentric Coordinates Demo
+
+To build:
+    ./build.sh
+
+To run:
+    ./triangle testdata.tri
+
+If you have glew installed (needed for pixel shading) you can enable it with
+the -DGLEW_SUPPORT directive. Otherwise, it will just use regular OpenGL to
+draw the scene.
+
+Click and drag on the corners of the triangle to move it around.

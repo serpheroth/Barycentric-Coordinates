@@ -1,3 +1,5 @@
+// Author: Tom Fiset
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -9,22 +11,15 @@
 
 #include "shader.h"
 #include "vec.h"
+#include "vertex.h"
+#include "loader.h"
 
 using namespace std;
 
 #define ESCAPE 27
-#define RADIUS 20
+#define RADIUS 10
 #define WIDTH  400
 #define HEIGHT 400
-
-
-
-// a triangle vertex
-struct vertex {
-    vec2 p; // position
-    vec3 c; // color
-};
-
 
 void reshape(int w, int h);
 void shaderDisplay(void);
@@ -34,13 +29,14 @@ void mousePress(int button, int state, int x, int y);
 void mouseDrag(int x, int y);
 
 Shader* f_shader;
-static vertex a,b,c;
 static bool DRAG_A         = false;
 static bool DRAG_B         = false;
 static bool DRAG_C         = false;
 static bool SHADER_SUPPORT = false;
 static int  W_WIDTH        = 400;
 static int  W_HEIGHT       = 400;
+static vector<Vertex> vertices;
+static Vertex a,b,c;
 
 void centerWindow(int w_width, int w_height) {
     // center window in screen
@@ -75,18 +71,21 @@ void registerCallbacks() {
 
 int main(int argc, char** argv) {
     printf("Barycentric Coordinate Demo\n");
-    glutInit(&argc,argv);
- 
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 
+    if(argc < 2) {
+        printf("Indicate a file please.\n");
+        return 0;
+    } 
+
+    glutInit(&argc,argv); 
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WIDTH,HEIGHT); 
-    
     centerWindow(WIDTH,HEIGHT);
 
     glutCreateWindow("Barycentric Coordinates");
 
     glShadeModel(GL_FLAT);
-    //glDisable(GL_DEPTH_TEST); 
+    glDisable(GL_DEPTH_TEST); 
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_BLEND);
@@ -103,7 +102,6 @@ int main(int argc, char** argv) {
 
         f_shader = new Shader();
 
-        //f_shader->load("shader.vert",GL_VERTEX_SHADER);
         f_shader->load("shader.frag",GL_FRAGMENT_SHADER);
         f_shader->link(); 
     }
@@ -114,13 +112,26 @@ int main(int argc, char** argv) {
         SHADER_SUPPORT = false;
         glShadeModel(GL_SMOOTH); 
     }
-    a.p = vec2(200,100);
-    b.p = vec2(100,300);
-    c.p = vec2(300,300);
 
-    a.c = vec3(1,0,0);
-    b.c = vec3(0,1,0);
-    c.c = vec3(0,0,1);
+    printf("Loading vertex data...\n");
+    Loader::loadVertices(vertices,argv[1]);
+    //for(int i=0; i<vertices.size(); i++)
+    //    vertices[i].print();
+
+    if(vertices.size() >= 3) {
+        a = vertices[0];
+        b = vertices[1];
+        c = vertices[2];
+    } else {
+        printf("Using preset values for a,b,c!\n");
+        a.pos = vec3(10,10,0);
+        b.pos = vec3(20,20,0);
+        c.pos = vec3(20,10,0);
+
+        a.color = vec3(1,0,0);
+        b.color = vec3(0,1,0);
+        c.color = vec3(0,0,1);
+    }
 
     registerCallbacks();
             
@@ -128,7 +139,6 @@ int main(int argc, char** argv) {
 }
 
 void reshape(int w, int h) {
-    printf("Reshape (%i,%i)\n",w,h);
     W_WIDTH = w;
     W_HEIGHT= h;
     glViewport(0,0,w,h);
@@ -139,10 +149,10 @@ void reshape(int w, int h) {
     glutPostRedisplay();
 }
 
-void drawCircle(float x, float y, float r) {
+void drawCircle(vec2 v, float r) {
     glBegin(GL_LINE_LOOP);
     for(float angle=0; angle < 6.28; angle+=.1)
-        glVertex2f(x+sin(angle)*r,y+cos(angle)*r);
+        glVertex2f(v.x+sin(angle)*r,v.y+cos(angle)*r);
     glEnd();
 }
 
@@ -152,22 +162,27 @@ void shaderDisplay(void) {
     glLoadIdentity();
 #ifdef GLEW_SUPPORT
     f_shader->bind();
-    
+
+    glColor3f(0.5,0.5,0.5);
+    drawCircle(a.pos.xy(),RADIUS);
+    drawCircle(b.pos.xy(),RADIUS);
+    drawCircle(c.pos.xy(),RADIUS);
+   
     // set uniforms
-    f_shader->uniform2f("v[0].p", a.p.x, a.p.y);
-    f_shader->uniform2f("v[1].p", b.p.x, b.p.y);
-    f_shader->uniform2f("v[2].p", c.p.x, c.p.y);
-    f_shader->uniform3f("v[0].c", a.c.x, a.c.y, a.c.z);
-    f_shader->uniform3f("v[1].c", b.c.x, b.c.y, b.c.z);
-    f_shader->uniform3f("v[2].c", c.c.x, c.c.y, c.c.z);
+    f_shader->uniform2f("v[0].p",a.pos.x,a.pos.y);
+    f_shader->uniform2f("v[1].p",b.pos.x,b.pos.y);
+    f_shader->uniform2f("v[2].p",c.pos.x,c.pos.y);
+    f_shader->uniform3f("v[0].c",a.color.x,a.color.y,a.color.z);
+    f_shader->uniform3f("v[1].c",b.color.x,b.color.y,b.color.z);
+    f_shader->uniform3f("v[2].c",c.color.x,c.color.y,c.color.z);
+
     f_shader->uniform2f("windim",W_WIDTH,W_HEIGHT);
     f_shader->uniform2f("realdim",WIDTH,HEIGHT);
-#endif
 
+#endif
     glBegin(GL_TRIANGLES);
-    glVertex2f(a.p.x,a.p.y);
-    glVertex2f(b.p.x,b.p.y);
-    glVertex2f(c.p.x,c.p.y);
+    for(int i=0; i<vertices.size(); i++)
+        glVertex3f(vertices[i].pos.x,vertices[i].pos.y,vertices[i].pos.z);
     glEnd();
 
 #ifdef GLEW_SUPPORT
@@ -182,19 +197,25 @@ void normalDisplay(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    glColor3f(1.0,1.0,1.0);
-    drawCircle(a.p.x,a.p.y,RADIUS);
-    drawCircle(b.p.x,b.p.y,RADIUS);
-    drawCircle(c.p.x,c.p.y,RADIUS);
+    glColor3f(0.5,0.5,0.5);
+    drawCircle(a.pos.xy(),RADIUS);
+    drawCircle(b.pos.xy(),RADIUS);
+    drawCircle(c.pos.xy(),RADIUS);
  
     glColor3f(1.0,1.0,1.0); 
     glBegin(GL_TRIANGLES);
-    glColor3f(a.c.x,a.c.y,a.c.z);
-    glVertex2f(a.p.x,a.p.y);
-    glColor3f(b.c.x,b.c.y,b.c.z);
-    glVertex2f(b.p.x,b.p.y);
-    glColor3f(c.c.x,c.c.y,c.c.z);
-    glVertex2f(c.p.x,c.p.y);
+    glColor3f(a.color.x,a.color.y,a.color.z);
+    glVertex2f(a.pos.x,a.pos.y);
+    glColor3f(b.color.x,b.color.y,b.color.z);
+    glVertex2f(b.pos.x,b.pos.y);
+    glColor3f(c.color.x,c.color.y,c.color.z);
+    glVertex2f(c.pos.x,c.pos.y);
+    glEnd();
+
+    glColor3f(1.0,1.0,1.0);
+    glBegin(GL_LINE_LOOP);
+    for(int i=0; i<vertices.size(); i++)
+        glVertex3f(vertices[i].pos.x,vertices[i].pos.y,vertices[i].pos.z);
     glEnd();
 
     glutSwapBuffers();
@@ -205,16 +226,16 @@ void keyDown(unsigned char key, int x, int y) {
 }
 
 
-vec2 offset;
+vec3 offset;
 void mousePress(int button, int state, int x, int y) {
     // translate mouse_coord into world
     // coordinates
-    vec2 mouse_coord(x*WIDTH/W_WIDTH,
-                     y*HEIGHT/W_HEIGHT);
+    vec3 mouse_coord(x*WIDTH/W_WIDTH,
+                     y*HEIGHT/W_HEIGHT,0);
     
-    vec2 am = a.p - mouse_coord;
-    vec2 bm = b.p - mouse_coord;
-    vec2 cm = c.p - mouse_coord;
+    vec3 am = a.pos - mouse_coord;
+    vec3 bm = b.pos - mouse_coord;
+    vec3 cm = c.pos - mouse_coord;
 
     float dista = sqrt(am*am);
     float distb = sqrt(bm*bm);
@@ -245,10 +266,13 @@ void mousePress(int button, int state, int x, int y) {
 }
 
 void mouseDrag(int x, int y) {
-    vec2 drag_coord(x*WIDTH/W_WIDTH,
-                    y*HEIGHT/W_HEIGHT);
-    if(DRAG_A) a.p = drag_coord + offset;
-    if(DRAG_B) b.p = drag_coord + offset;
-    if(DRAG_C) c.p = drag_coord + offset;
+    vec3 drag_coord(x*WIDTH/W_WIDTH,
+                    y*HEIGHT/W_HEIGHT,0);
+    if(DRAG_A) a.pos = drag_coord + offset;
+    if(DRAG_B) b.pos = drag_coord + offset;
+    if(DRAG_C) c.pos = drag_coord + offset;
+    vertices[0] = a;
+    vertices[1] = b;
+    vertices[2] = c;
     glutPostRedisplay();
 }

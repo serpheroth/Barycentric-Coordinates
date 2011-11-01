@@ -1,3 +1,5 @@
+// Author: Tom Fiset
+
 #version 150
 
 struct vertex {

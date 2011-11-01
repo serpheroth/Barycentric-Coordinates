@@ -1,9 +1,13 @@
+// Author: Tom Fiset
+
 #include "shader.h"
 
-#include <fstream>
+#include <cstdio>
 #include <vector>
 #include <string>
 #include <cstring>
+
+#include "loader.h"
 
 using namespace std;
 
@@ -26,18 +30,6 @@ Shader::~Shader() {
     glDeleteProgram(m_program_id);
 }
 
-static inline string readFile(const char* f_name) {
-    ifstream ifs(f_name,ifstream::in);
-    string s;
-
-    while(ifs.good()) s += ifs.get();
-
-    ifs.close();
-    s[s.size()-1] = '\0';
-
-    return s;
-}
-
 void Shader::load(const char* f_name, GLenum type) {
     printf("Loading shader from: %s\n",f_name);
     GLhandleARB shader = glCreateShaderObjectARB(type);
@@ -50,7 +42,7 @@ void Shader::load(const char* f_name, GLenum type) {
     m_shaders.push_back(shader);
 
     printf("    Reading shader file...\n");
-    string shader_text = readFile(f_name);
+    string shader_text = Loader::readShaderFile(f_name);
     if(shader_text.empty()) {
         printf("ERROR: could not read file!\n");
         return;
