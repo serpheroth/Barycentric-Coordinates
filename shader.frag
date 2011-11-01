@@ -1,25 +1,31 @@
 #version 150
 
-uniform vec2 apos;
-uniform vec2 bpos;
-uniform vec2 cpos;
+struct vertex {
+    vec2 p;
+    vec3 c;
+};
 
-uniform vec3 acol;
-uniform vec3 bcol;
-uniform vec3 ccol;
+uniform vertex v[3];
 
 uniform vec2 windim;
 uniform vec2 realdim;
 
+// calculate barycentric coordinates
+vec3 barycentric(in vec2 p, in vec2 a, in vec2 b, in vec2 c) {
+    mat2 m = mat2( a-c, b-c );
+    
+    vec3 bary = vec3(inverse(m)*(p-c),1.0);
+    bary[2] = 1 - bary[0] - bary[1];
+    
+    return bary;
+}
+
 void main() {
-    mat2 m = mat2( apos-cpos, bpos-cpos );
-    vec2 pos = vec2(gl_FragCoord.x*realdim.x/windim.x
-                    gl_FragCoord.y*realdim.x/windim.y);
+    // first convert gl_FragCoord into something we can use
+    vec2 pos = gl_FragCoord.xy*realdim/windim;
+    pos.y = realdim.y - pos.y;
 
-    vec3 lambda = vec3(inverse(m)*(pos-cpos),1.0);
-    lambda[2] = 1 - lambda[0] - lambda[1]; 
+    vec3 l = barycentric(pos,v[0].p,v[1].p,v[2].p);
 
-    gl_FragColor = vec4(lambda[0]*acol +
-                        lambda[1]*bcol +
-                        lambda[2]*ccol,1);
+    gl_FragColor.rgba = vec4(l.x*v[0].c + l.y*v[1].c + l.z*v[2].c,1);
 }

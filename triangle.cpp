@@ -13,7 +13,7 @@
 using namespace std;
 
 #define ESCAPE 27
-#define RADIUS 5
+#define RADIUS 20
 #define WIDTH  400
 #define HEIGHT 400
 
@@ -151,16 +151,15 @@ void shaderDisplay(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 #ifdef GLEW_SUPPORT
-    printf("GLEW supported!\n");
     f_shader->bind();
     
     // set uniforms
-    f_shader->uniform2f("avert", a.p.x, a.p.y);
-    f_shader->uniform2f("bvert", b.p.x, b.p.y);
-    f_shader->uniform2f("cvert", c.p.x, c.p.y);
-    f_shader->uniform3f("acol", a.c.x, a.c.y, a.c.z);
-    f_shader->uniform3f("bcol", b.c.x, b.c.y, b.c.z);
-    f_shader->uniform3f("ccol", c.c.x, c.c.y, c.c.z);
+    f_shader->uniform2f("v[0].p", a.p.x, a.p.y);
+    f_shader->uniform2f("v[1].p", b.p.x, b.p.y);
+    f_shader->uniform2f("v[2].p", c.p.x, c.p.y);
+    f_shader->uniform3f("v[0].c", a.c.x, a.c.y, a.c.z);
+    f_shader->uniform3f("v[1].c", b.c.x, b.c.y, b.c.z);
+    f_shader->uniform3f("v[2].c", c.c.x, c.c.y, c.c.z);
     f_shader->uniform2f("windim",W_WIDTH,W_HEIGHT);
     f_shader->uniform2f("realdim",WIDTH,HEIGHT);
 #endif
