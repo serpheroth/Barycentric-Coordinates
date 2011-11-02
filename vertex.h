@@ -12,6 +12,9 @@ struct Vertex {
     vec3 color;
 
     Vertex() {}
+    
+    Vertex(vec3 p, vec3 c)
+        : pos(p), color(c) {}
 
     Vertex(const Vertex& v)
         : pos(v.pos), color(v.color) {}

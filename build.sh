@@ -9,7 +9,7 @@ CPPFLAGS="-DGLEW_SUPPORT -lGLEW"
 if [ OSTYPE=='linux-gnu' ]
 then
     echo 'Compiling for linux.'
-    g++ -ggdb -o  triangle *.cpp -lglut -lGL $CPPFLAGS
+    g++ -ggdb -o  triangle *.cpp -lglut -lGL -lGLU $CPPFLAGS
 else
     echo 'Compiling for mac (or anything not linux).'
     g++ -g -o triangle *.cpp -I/usr/X11/include -L/usr/X11/lib -lglut -lGL

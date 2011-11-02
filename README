@@ -5,7 +5,7 @@ To build:
     ./build.sh
 
 To run:
-    ./triangle testdata.tri
+    ./triangle models/testdata.tri
 
 If you have glew installed (needed for pixel shading) you can enable it with
 the -DGLEW_SUPPORT directive. Otherwise, it will just use regular OpenGL to
