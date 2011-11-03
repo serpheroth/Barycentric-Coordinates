@@ -8,6 +8,7 @@
 #include "glutwrapper.h"
 #include "vec.h"
 #include "vertex.h"
+#include "shader.h"
 
 using namespace std;
 
@@ -29,6 +30,8 @@ class Barycentric : public GlutWrapper {
         vector<Vertex> m_vertices;
         int            m_drag_index;
         vec2           m_drag_offset;
+        Shader*        m_shader;
+        bool           m_wireframe;
 };
 
 #endif

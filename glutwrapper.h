@@ -23,6 +23,7 @@ class GlutWrapper {
         static void setInst(GlutWrapper* inst);
 
         static void initGlut(int* argc, char** argv, vec2 w_dim, const char* w_title);
+        static void start();
 
         vec2 windowDim();
         void setWindowDim(vec2 dim);

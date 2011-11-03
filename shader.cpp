@@ -41,20 +41,22 @@ void Shader::load(const char* f_name, GLenum type) {
 
     m_shaders.push_back(shader);
 
-    printf("    Reading shader file...\n");
+    printf("    Reading file....... ");
     string shader_text = Loader::readShaderFile(f_name);
+    printf("ok\n");
     if(shader_text.empty()) {
         printf("ERROR: could not read file!\n");
         return;
     }
 
-    printf("    Compiling shader...\n");
+    printf("    Compiling shader... ");
 
     const char* array[1];
     array[0] = shader_text.c_str();
 
     glShaderSourceARB(shader,1,(const GLcharARB**)array,NULL);
     glCompileShaderARB(shader);
+    printf("ok\n");
 
     int compiled;
     glGetObjectParameterivARB(
@@ -80,8 +82,9 @@ void Shader::load(const char* f_name, GLenum type) {
         return;
     }
 
-    printf("    Attaching shader...\n");
+    printf("    Attaching shader... ");
     glAttachShader(m_program_id,shader);
+    printf("ok\n");
 }
 
 void Shader::link() {

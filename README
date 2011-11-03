@@ -12,3 +12,4 @@ the -DGLEW_SUPPORT directive. Otherwise, it will just use regular OpenGL to
 draw the scene.
 
 Click and drag on the corners of the triangle to move it around.
+Press W to enable or disable the wireframe view.

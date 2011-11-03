@@ -68,6 +68,9 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
     glCullFace(GL_BACK);
 
     registerCallbacks();
+}
+
+void GlutWrapper::start() {
     glutMainLoop();
 }
 
