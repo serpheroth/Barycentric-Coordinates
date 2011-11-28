@@ -1,5 +1,6 @@
 #include "barycentric.h"
 #include "model.h"
+#include <cstdlib>
 
 int main(int argc, char** argv) {
     if(argc == 1) {

@@ -6,6 +6,7 @@
 #include <GL/glu.h>
 #include <math.h>
 #include <limits.h>
+#include <cstdlib>
 
 #include "loader.h"
 
@@ -21,7 +22,8 @@ void Model::init(const char* f_name) {
     m_show_wireframe = false;
     m_show_normals   = false;
 
-    m_rot_last = Quaternion();
+    m_rot_last = Quaternion(0,0,0,1);
+    m_rot = Quaternion(0,0,0,1);
     if(f_name) {
         Loader::loadVertices(m_vertices,f_name);
         if(m_vertices.size() == 0 ||
@@ -54,10 +56,28 @@ void Model::display() {
     GLfloat lightPosition[] = { 0.0f, 3.0f, 300.0f, 1.0f };
     glLightfv(GL_LIGHT0,GL_POSITION,lightPosition);
 
-    glPushMatrix();
-    Quaternion temp = m_rot*m_rot_last;
-    glRotatef(temp.w*360.0,temp.x,temp.y,temp.z);
-    //printf("temp: %f %f %f %f\n",temp.x,temp.y,temp.z,temp.w);
+    Quaternion q = m_rot_last*m_rot;
+    float x = q.y;
+    float y = -q.x;
+    float z = q.z;
+    float w = q.w;
+    float x2 = x * x;
+    float y2 = y * y;
+    float z2 = z * z;
+    float xy = x * y;
+    float xz = x * z;
+    float yz = y * z;
+    float wx = w * x;
+    float wy = w * y;
+    float wz = w * z;
+ 
+    float f[] = { 1.0f - 2.0f * (y2 + z2), 2.0f * (xy - wz), 2.0f * (xz + wy), 0.0f,
+            2.0f * (xy + wz), 1.0f - 2.0f * (x2 + z2), 2.0f * (yz - wx), 0.0f,
+            2.0f * (xz - wy), 2.0f * (yz + wx), 1.0f - 2.0f * (x2 + y2), 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f};
+
+    glMatrixMode(GL_MODELVIEW);
+    glMultMatrixf(f);
 
     if(!m_show_wireframe) {
         glEnable(GL_LIGHTING);
@@ -101,8 +121,7 @@ void Model::display() {
             glEnd();
         }
     }
-    glPopMatrix();
-
+    
     glutSwapBuffers();
     glutPostRedisplay();
 }
@@ -126,6 +145,14 @@ void Model::keyDown(unsigned char c, int x, int y) {
         m_show_normals = !m_show_normals;
         glutPostRedisplay();
     }
+    if(c == 'a') {
+        setAntialiasing(!isAntialiased());
+        glutPostRedisplay();
+    }
+    if(c == 's') {
+        setSpecular(!isSpecular());
+        glutPostRedisplay();
+    }
 }
 
 void Model::mouseAction(int button, int state, int x, int y) {
@@ -133,7 +160,8 @@ void Model::mouseAction(int button, int state, int x, int y) {
     if(state == GLUT_DOWN)
         m_mouse_click = vec2(x*600/windowDim().x-300,300-y*600/windowDim().y);
     if(state == GLUT_UP) {
-        m_rot_last = m_rot;
+        m_rot_last = m_rot_last*m_rot;
+        m_rot = Quaternion(0,0,0,1);
     }
 }
 
@@ -141,9 +169,10 @@ void Model::mouseDrag(int x, int y) {
     vec2 mouse_coord(x*600/windowDim().x-300,300-y*600/windowDim().y);
    
     vec3 diff = vec3(mouse_coord - m_mouse_click,0);
-    float m = sqrt(diff*diff);
-    diff.normalize(); 
-    m_rot = Quaternion::fromAxisAngle(diff.y,-diff.x,0,m/360.0);
+    //if(fabs(diff.x) > fabs(diff.y)) diff.y = 0;
+    //else diff.x = 0;
+    float m = sqrt(diff*diff); 
+    m_rot = Quaternion::fromAxisAngle(diff.x/m,diff.y/m,0,m/360.0);
     //m_rot.w *= 20;
     //printf("m_rot: %f %f %f %f\n",m_rot.x,m_rot.y,m_rot.z,m_rot.w);
 

@@ -6,6 +6,7 @@
 #include <GL/glu.h>
 #include <math.h>
 #include <limits.h>
+#include <cstdlib>
 
 #include "loader.h"
 

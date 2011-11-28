@@ -3,7 +3,9 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#ifdef GLEW_SUPPORTED
 #include <GL/glew.h>
+#endif
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glext.h>

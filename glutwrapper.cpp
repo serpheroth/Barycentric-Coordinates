@@ -15,6 +15,8 @@ static void mouseDrag(int x, int y);
 GlutWrapper* GlutWrapper::m_instance = 0;
 bool GlutWrapper::m_glut_running = false;
 vec2 GlutWrapper::m_window_dim = vec2();
+bool GlutWrapper::m_antialiased = false;
+bool GlutWrapper::m_specular    = false;
 
 GlutWrapper::GlutWrapper() {}
 
@@ -59,11 +61,7 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
     //glShadeModel(GL_FLAT);
 
     // antialiasing
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_LINE_SMOOTH,GL_NICEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    
 
     // depth testing / culling
     glEnable(GL_DEPTH_TEST);
@@ -81,15 +79,50 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
     glLightfv(GL_LIGHT0,GL_DIFFUSE,lightDiffuse);
     glLightfv(GL_LIGHT0,GL_SPECULAR,lightSpecular);
     //glLightfv(GL_LIGHT0,GL_POSITION,lightPosition);
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat mat_shininess[] = { 500.0 };
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
 
     registerCallbacks();
+}
+
+bool GlutWrapper::isAntialiased() {
+    return m_antialiased;
+}
+void GlutWrapper::setAntialiasing(bool b) {
+    m_antialiased = b;
+    if(b) {
+        glShadeModel(GL_SMOOTH);
+        glEnable(GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH,GL_NICEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    } else {
+        glDisable(GL_LINE_SMOOTH);
+        glHint(GL_LINE_SMOOTH,GL_FASTEST);
+        glDisable(GL_BLEND);
+        glShadeModel(GL_FLAT);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    }
+}
+
+bool GlutWrapper::isSpecular() {
+    return m_specular;
+}
+void GlutWrapper::setSpecular(bool b) {
+    m_specular = b;
+    if(b) {
+        GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+        GLfloat mat_shininess[] = { 500.0 };
+        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    } else {
+        GLfloat mat_specular[] = { 0.0, 0.0, 0.0, 0.0 };
+        GLfloat mat_shininess[] = { 500.0 };
+        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    }
 }
 
 void GlutWrapper::start() {

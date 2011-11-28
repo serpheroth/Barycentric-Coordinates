@@ -21,6 +21,10 @@ class GlutWrapper {
         static bool running();
         static GlutWrapper* inst();
         static void setInst(GlutWrapper* inst);
+        static bool isAntialiased();
+        static void setAntialiasing(bool b);
+        static bool isSpecular();
+        static void setSpecular(bool b);
 
         static void initGlut(int* argc, char** argv, vec2 w_dim, const char* w_title);
         static void start();
@@ -34,6 +38,10 @@ class GlutWrapper {
         virtual void keyUp(unsigned char c, int x, int y);
         virtual void mouseAction(int button, int state, int x, int y);
         virtual void mouseDrag(int x, int y);
+
+    private:
+        static bool m_antialiased;
+        static bool m_specular;
 };
 
 #endif
