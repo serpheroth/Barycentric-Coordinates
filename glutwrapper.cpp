@@ -3,6 +3,7 @@
 #include "glutwrapper.h"
 
 #include <GL/glut.h>
+#include <cstdio>
 
 static void reshape(int width, int height);
 static void display();
@@ -36,15 +37,14 @@ void GlutWrapper::centerWindow() {
 
     w_pos = (screen_dim - m_window_dim)*0.5;
 
-#ifdef DEBUG
     printf("    Screen size: %i x %i\n",(int)screen_dim.x,(int)screen_dim.y);
     printf("    Placing window at (%i,%i)\n",(int)w_pos.x,(int)w_pos.y);
-#endif
 
     glutInitWindowPosition((int)w_pos.x,(int)w_pos.y);    
 }
 
 void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_title) {
+    printf("Initializing GLUT\n");
     m_glut_running = true;
     m_window_dim = w_dim;
     
@@ -55,17 +55,39 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
     centerWindow();
     glutCreateWindow(w_title);
 
-    glShadeModel(GL_FLAT);
+    //glEnable(GL_FLAT);
+    //glShadeModel(GL_FLAT);
+
+    // antialiasing
     glShadeModel(GL_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH,GL_NICEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    // depth testing / culling
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+
+    // lighting
+    GLfloat lightAmbient[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
+    GLfloat lightDiffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat lightSpecular[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+    //GLfloat lightPosition[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glLightfv(GL_LIGHT0,GL_AMBIENT,lightAmbient);
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,lightDiffuse);
+    glLightfv(GL_LIGHT0,GL_SPECULAR,lightSpecular);
+    //glLightfv(GL_LIGHT0,GL_POSITION,lightPosition);
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = { 500.0 };
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
 
     registerCallbacks();
 }
@@ -75,6 +97,7 @@ void GlutWrapper::start() {
 }
 
 void GlutWrapper::registerCallbacks() {
+    printf("Registering callbacks\n");
     glutDisplayFunc(::display);
     glutReshapeFunc(::reshape);
     glutKeyboardFunc(::keyDown);

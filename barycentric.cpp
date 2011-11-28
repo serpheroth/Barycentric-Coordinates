@@ -12,6 +12,7 @@
 #define RADIUS 10
 
 Barycentric::Barycentric() {
+    m_wireframe = false;
     m_vertices.push_back(Vertex(vec3(   0, 150,0),vec3(1,0,0)));
     m_vertices.push_back(Vertex(vec3( 150,-150,0),vec3(0,1,0)));
     m_vertices.push_back(Vertex(vec3(-150,-150,0),vec3(0,0,1)));
@@ -30,6 +31,7 @@ Barycentric::Barycentric() {
 }
 
 Barycentric::Barycentric(const char* f_name) {
+    m_wireframe = true;
     Loader::loadVertices(m_vertices,f_name);
     if(m_vertices.size() < 3) {
         printf("Not enough vertices in file: %s\n",f_name);
@@ -54,9 +56,10 @@ void Barycentric::display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
-    //gluLookAt(100,100,300,
-    //          0,0,0,
-    //          0,1,0);
+    glLoadIdentity();
+
+    GLfloat lightPosition[] = { 0.0f, 0.0f, 300.0f, 1.0f };
+    glLightfv(GL_LIGHT0,GL_POSITION,lightPosition);
 
     Vertex& a = m_vertices[0];
     Vertex& b = m_vertices[1];
@@ -68,7 +71,7 @@ void Barycentric::display() {
         drawCircle(m_vertices[1].pos.xy(),RADIUS);
         drawCircle(m_vertices[2].pos.xy(),RADIUS);
     }
-
+    
 #ifdef GLEW_SUPPORT
     if(GLEW_ARB_fragment_shader) {
         m_shader->bind();
@@ -83,23 +86,24 @@ void Barycentric::display() {
         m_shader->uniform2f("realdim",600,600);
     }
 #endif
- 
-    glColor3f(1.0,1.0,1.0); 
-    glBegin(GL_TRIANGLES);
-    for(int i=0; i<m_vertices.size(); i++) {
-        Vertex& v = m_vertices[i];
-        if(!m_shader)
-            glColor3f(v.color.x,v.color.y,v.color.z);
-        glVertex3f(v.pos.x,v.pos.y,v.pos.z);
+    glColor3f(0.4,0.4,1.0); 
+    if(!m_wireframe) {
+        glBegin(GL_TRIANGLES);
+        for(int i=0; i<m_vertices.size(); i++) {
+            Vertex& v = m_vertices[i];
+            //if(!m_shader || m_vertices.size() < 10)
+            //    glColor3f(v.color.x,v.color.y,v.color.z);
+            glVertex3f(v.pos.x,v.pos.y,v.pos.z);
+        }
+        glEnd();
     }
-    glEnd();
 
 #ifdef GLEW_SUPPORT
     if(GLEW_ARB_fragment_shader)
         m_shader->unbind();
 #endif
    
-    if(m_wireframe) { 
+    if(m_wireframe) {
         glColor3f(0.5,0.5,0.5);
         for(int i=0; i<m_vertices.size()/3; i++) {
             glBegin(GL_LINE_LOOP);
@@ -111,6 +115,7 @@ void Barycentric::display() {
     }
 
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void Barycentric::reshape(int width, int height) {
@@ -125,6 +130,7 @@ void Barycentric::reshape(int width, int height) {
 void Barycentric::keyDown(unsigned char c, int x, int y) {
     if(c==27) exit(0);
     if(c=='w') {
+        printf("wireframe: %i\n",m_wireframe);
         m_wireframe = !m_wireframe;
         glutPostRedisplay();
     }
@@ -171,16 +177,3 @@ void Barycentric::drawCircle(vec2 v, float r, float p) {
     glEnd();
 }
 
-int main(int argc, char** argv) {
-    if(argc == 1) {
-        printf("Please specify a file.\n");
-        exit(0);
-    } 
-
-    GlutWrapper::initGlut(
-        &argc,argv,vec2(600,600),"Barycentric Coordinates Demo");
-
-    Barycentric* b = new Barycentric(argv[1]);
-
-    GlutWrapper::start();
-}

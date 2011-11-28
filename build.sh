@@ -1,7 +1,7 @@
 #!/bin/sh
 
-CPPFLAGS="-DGLEW_SUPPORT -lGLEW"
-
+#CPPFLAGS="-DGLEW_SUPPORT -lGLEW"
+CPPFLAGS=""
 # this is not a very robust script
 # the point is just to get it working
 # on mac and linux

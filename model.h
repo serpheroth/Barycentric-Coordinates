@@ -1,7 +1,7 @@
 // Author: Tom Fiset
 
-#ifndef BARYCENTRIC_H
-#define BARYCENTRIC_H
+#ifndef MODEL_H
+#define MODEL_H
 
 #include <vector>
 
@@ -9,13 +9,16 @@
 #include "vec.h"
 #include "vertex.h"
 #include "shader.h"
+#include "quaternion.h"
 
 using namespace std;
 
-class Barycentric : public GlutWrapper {
+class Model : public GlutWrapper {
     public:
-        Barycentric();
-        Barycentric(const char* f_name);
+        Model();
+        Model(const char* f_name);
+    private:
+        void init(const char* f_name);
 
     protected:
         void display();
@@ -28,12 +31,14 @@ class Barycentric : public GlutWrapper {
         
     private:
         vector<Vertex> m_vertices;
-        int            m_drag_index;
-        vec2           m_drag_offset;
-        Shader*        m_shader;
-        bool           m_wireframe;
-        vec2           m_rot_last;
-        vec2           m_rot;
+        vector<vec3>   m_normals;
+
+        
+        bool           m_show_wireframe;
+        bool           m_show_normals;
+        vec2           m_mouse_click;
+        Quaternion     m_rot_last;
+        Quaternion     m_rot;
 };
 
 #endif
