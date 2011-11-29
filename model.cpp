@@ -57,25 +57,9 @@ void Model::display() {
     glLightfv(GL_LIGHT0,GL_POSITION,lightPosition);
 
     Quaternion q = m_rot_last*m_rot;
-    float x = q.y;
-    float y = -q.x;
-    float z = q.z;
-    float w = q.w;
-    float x2 = x * x;
-    float y2 = y * y;
-    float z2 = z * z;
-    float xy = x * y;
-    float xz = x * z;
-    float yz = y * z;
-    float wx = w * x;
-    float wy = w * y;
-    float wz = w * z;
- 
-    float f[] = { 1.0f - 2.0f * (y2 + z2), 2.0f * (xy - wz), 2.0f * (xz + wy), 0.0f,
-            2.0f * (xy + wz), 1.0f - 2.0f * (x2 + z2), 2.0f * (yz - wx), 0.0f,
-            2.0f * (xz - wy), 2.0f * (yz + wx), 1.0f - 2.0f * (x2 + y2), 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f};
-
+    
+    float f[16]; 
+    q.getRotationMatrix(f);
     glMatrixMode(GL_MODELVIEW);
     glMultMatrixf(f);
 
@@ -83,6 +67,8 @@ void Model::display() {
         glEnable(GL_LIGHTING);
         glColor3f(0.5,0.5,0.5); 
         for(int i=0; i<m_vertices.size(); i+=3) {
+            vec3 color = (m_vertices[i].color+m_vertices[i+1].color+m_vertices[i+2].color)/3;
+            glColor3f(color.x,color.y,color.z);
             vec3& a = m_vertices[i+0].pos;
             vec3& b = m_vertices[i+1].pos;
             vec3& c = m_vertices[i+2].pos;
@@ -169,12 +155,8 @@ void Model::mouseDrag(int x, int y) {
     vec2 mouse_coord(x*600/windowDim().x-300,300-y*600/windowDim().y);
    
     vec3 diff = vec3(mouse_coord - m_mouse_click,0);
-    //if(fabs(diff.x) > fabs(diff.y)) diff.y = 0;
-    //else diff.x = 0;
     float m = sqrt(diff*diff); 
     m_rot = Quaternion::fromAxisAngle(diff.x/m,diff.y/m,0,m/360.0);
-    //m_rot.w *= 20;
-    //printf("m_rot: %f %f %f %f\n",m_rot.x,m_rot.y,m_rot.z,m_rot.w);
 
     glutPostRedisplay();
 }

@@ -1,15 +1,27 @@
 Tom Fiset
-Barycentric Coordinates Demo
+Barycentric Coordinates Demo / Model View Demo
 
 To build:
     ./build.sh
 
 To run:
-    ./triangle models/testdata.tri
+    ./demo models/testdata.tri
 
 If you have glew installed (needed for pixel shading) you can enable it with
 the -DGLEW_SUPPORT directive. Otherwise, it will just use regular OpenGL to
 draw the scene.
 
-Click and drag on the corners of the triangle to move it around.
-Press W to enable or disable the wireframe view.
+
+::For Barycentric Coordinate Demo::
+  Click and drag on the corners of the triangle to move it around.
+  Press W to enable or disable the wireframe view.
+
+::For Model View Demo::
+  Drag the model around with your mouse. Since the program uses quaternions,
+  the model will change with respect to its current orientation, hopefully
+  making rotation more natural and intuitive.
+
+  Press w to toggle wireframe.
+  Press n to display normals.
+  Press s to enable specular.
+  Press a to enable antialiasing/smooth shading.

@@ -1,3 +1,5 @@
+// Author: Tom Fiset
+
 #include "quaternion.h"
 
 #include <math.h>
@@ -26,6 +28,37 @@ Quaternion Quaternion::operator*(const Quaternion& q) {
     );
 
     return result;
+}
+
+void Quaternion::getRotationMatrix(float f[16]) {
+    float x =  this->y;
+    float y = -this->x;
+    float x2 = x * x;
+    float y2 = y * y;
+    float z2 = z * z;
+    float xy = x * y;
+    float xz = x * z;
+    float yz = y * z;
+    float wx = w * x;
+    float wy = w * y;
+    float wz = w * z;
+
+    f[0]  = 1.0f - 2.0f * (y2 + z2);
+    f[1]  = 2.0f * (xy - wz);
+    f[2]  = 2.0f * (xz + wy);
+    f[3]  = 0.0f;
+    f[4]  = 2.0f * (xy + wz);
+    f[5]  = 1.0f - 2.0f * (x2 + z2);
+    f[6]  = 2.0f * (yz - wx);
+    f[7]  = 0.0f;
+    f[8]  = 2.0f * (xz - wy);
+    f[9]  = 2.0f * (yz + wx);
+    f[10] = 1.0f - 2.0f * (x2 + y2);
+    f[11] = 0.0f;
+    f[12] = 0.0f;
+    f[13] = 0.0f;
+    f[14] = 0.0f;
+    f[15] = 1.0f;
 }
 
 Quaternion Quaternion::fromAxisAngle(float axis_x, float axis_y, float axis_z, float angle) {

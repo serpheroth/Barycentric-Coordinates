@@ -57,12 +57,6 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
     centerWindow();
     glutCreateWindow(w_title);
 
-    //glEnable(GL_FLAT);
-    //glShadeModel(GL_FLAT);
-
-    // antialiasing
-    
-
     // depth testing / culling
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -72,7 +66,7 @@ void GlutWrapper::initGlut(int* argc, char** argv, vec2 w_dim, const char* w_tit
 
     // lighting
     GLfloat lightAmbient[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
-    GLfloat lightDiffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat lightDiffuse[]  = { 0.8f, 0.8f, 0.8f, 1.0f };
     GLfloat lightSpecular[] = { 0.6f, 0.6f, 0.6f, 1.0f };
     //GLfloat lightPosition[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glLightfv(GL_LIGHT0,GL_AMBIENT,lightAmbient);

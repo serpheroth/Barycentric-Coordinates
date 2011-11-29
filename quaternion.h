@@ -1,4 +1,5 @@
 // Author: Tom Fiset
+
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
@@ -11,6 +12,8 @@ class Quaternion {
 
     public:
         Quaternion operator*(const Quaternion& q);
+
+        void getRotationMatrix(float f[16]);
         
         static Quaternion fromAxisAngle(float axis_x, float axis_y, float axis_z, float angle);
 
